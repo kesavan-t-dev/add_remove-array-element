@@ -107,6 +107,12 @@ function array() {
         showError("Invalid input");
         return;
     }
+    
+    if ((hasLetter(sentence) && hasNumber(replacement)) || hasLetter(replacement) && hasNumber(sentence) ) {
+        showError("Invalid input");
+        return;
+    }
+
 
     words.splice(position - 1, 1, replacement);
 
@@ -156,7 +162,6 @@ function hasLetter(text) {
     }
     return false;
 }
-
 
 function hasInvalidSignUsage(sentence) {
     let parts = sentence.split(",");
