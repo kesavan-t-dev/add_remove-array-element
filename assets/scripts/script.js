@@ -12,6 +12,7 @@ function array() {
         return;
     }
 
+
     let sentence = input.trim();
 
     if (sentence.startsWith(",") || sentence.endsWith(",")) {
@@ -26,7 +27,7 @@ function array() {
 
     let normalized = "";
     let prevComma = false;
-
+    
     for (let ch of sentence) {
         if (ch === "," || ch === " ") {
             if (!prevComma) {
@@ -46,17 +47,7 @@ function array() {
         return;
     }
 
-    let hasLetter = false;
-    let hasNumber = false;
-
-    for (let word of words) {
-        for (let ch of word) {
-            if (ch >= "0" && ch <= "9") hasNumber = true;
-            if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")) hasLetter = true;
-        }
-    }
-
-    if ((hasLetter && hasNumber)) {
+    if ((hasLetter(sentence) && hasNumber(sentence))) {
         showError("Invalid input");
         return;
     }
@@ -80,7 +71,6 @@ function array() {
     const position = Number(positionRaw);
     if(position < 0){
         showError("positive number only allowed");
-        return;
     }
 
     if (position === 0) {
@@ -105,6 +95,11 @@ function array() {
         return;
     }
 
+    if (hasNumber(replacement)) {
+        showError("Invalid input");
+        return;
+    }
+
     words.splice(position - 1, 1, replacement);
 
     errorMsg.innerText = `Updated sentence: ${words.join(",")}`;
@@ -121,6 +116,9 @@ function hasSpecialChar(text) {
             !(code >= 97 && code <= 122) &&  
             !(code >= 48 && code <= 57) &&   
             ch !== "," &&
+            ch !== "." &&
+            ch !== "-" &&
+            ch !== "+" &&
             ch !== " "
         ) {
             return true;
@@ -128,6 +126,30 @@ function hasSpecialChar(text) {
     }
     return false;
 }
+
+function hasNumber(text) {
+    for (let ch of text) {
+        const code = ch.charCodeAt(0);
+        if ((ch >= "0" && ch <= "9")
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function hasLetter(text) {
+    for (let ch of text) {
+        const code = ch.charCodeAt(0);
+        if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 
 function showError(message) {
     const errorMsg = document.getElementById("error_msg");
