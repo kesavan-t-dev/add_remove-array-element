@@ -1,32 +1,63 @@
-function processArray() {
-    const sentenceRaw = document.getElementById("user-input-one").value;
-    const positionRaw = document.getElementById("user-input-two").value;
-    const replacementRaw = document.getElementById("user-input-three").value;
-    const errorMsg = document.getElementById("error-msg");
+function array() {
+    const input = document.getElementById("user_input_one").value;
+    const positionRaw = document.getElementById("user_input_two").value;
+    const replacementRaw = document.getElementById("user_input_three").value;
+    const errorMsg = document.getElementById("error_msg");
 
     errorMsg.classList.add("d-none");
     errorMsg.classList.replace("alert-success", "alert-danger");
 
-    if (sentenceRaw.trim().length === 0) {
+    if (input.trim().length === 0) {
         showError("Please enter a sentence");
         return;
     }
 
-    const sentence = sentenceRaw.trim();
+    let sentence = input.trim();
 
-    if (sentence.endsWith(",")) {
-        showError("Invalid input");
+    if (sentence.startsWith(",") || sentence.endsWith(",")) {
+        showError("Special Character(s) not allowed");
         return;
     }
+
     if (hasSpecialChar(sentence)) {
         showError("Special Character(s) not allowed");
         return;
     }
 
-    const words = sentence.split(" ").filter(w => w !== "");
+    let normalized = "";
+    let prevComma = false;
+
+    for (let ch of sentence) {
+        if (ch === "," || ch === " ") {
+            if (!prevComma) {
+                normalized += ",";
+                prevComma = true;
+            }
+        } else {
+            normalized += ch;
+            prevComma = false;
+        }
+    }
+
+    let words = normalized.split(",").filter(w => w !== "");
 
     if (words.length === 1) {
         showError("Enter more than one word");
+        return;
+    }
+
+    let hasLetter = false;
+    let hasNumber = false;
+
+    for (let word of words) {
+        for (let ch of word) {
+            if (ch >= "0" && ch <= "9") hasNumber = true;
+            if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")) hasLetter = true;
+        }
+    }
+
+    if ((hasLetter && hasNumber)) {
+        showError("Invalid input");
         return;
     }
 
@@ -73,20 +104,21 @@ function processArray() {
 
     words.splice(position - 1, 1, replacement);
 
-    errorMsg.innerText = `Updated sentence: ${words.join(" ")}`;
+    errorMsg.innerText = `Updated sentence: ${words.join(",")}`;
     errorMsg.classList.remove("d-none");
     errorMsg.classList.replace("alert-danger", "alert-success");
 }
 
+
 function hasSpecialChar(text) {
     for (let ch of text) {
         const code = ch.charCodeAt(0);
-
-        // allow A-Z, a-z and space
         if (
-            !((code >= 65 && code <= 90) ||
-              (code >= 97 && code <= 122) ||
-              ch === " ")
+            !(code >= 65 && code <= 90) &&   
+            !(code >= 97 && code <= 122) &&  
+            !(code >= 48 && code <= 57) &&   
+            ch !== "," &&
+            ch !== " "
         ) {
             return true;
         }
@@ -95,15 +127,15 @@ function hasSpecialChar(text) {
 }
 
 function showError(message) {
-    const errorMsg = document.getElementById("error-msg");
+    const errorMsg = document.getElementById("error_msg");
     errorMsg.innerText = message;
     errorMsg.classList.remove("d-none");
     errorMsg.classList.replace("alert-success", "alert-danger");
 }
 
 function resetForm() {
-    document.getElementById("user-input-one").value = "";
-    document.getElementById("user-input-two").value = "";
-    document.getElementById("user-input-three").value = "";
-    document.getElementById("error-msg").classList.add("d-none");
+    document.getElementById("user_input_one").value = "";
+    document.getElementById("user_input_two").value = "";
+    document.getElementById("user_input_three").value = "";
+    document.getElementById("error_msg").classList.add("d-none");
 }
