@@ -65,6 +65,10 @@ function array() {
         showError("Please enter the position");
         return;
     }
+    if (hasLetter(positionRaw)) {
+        showError("Numbers only allowed")
+        return;
+    }
 
     for (let ch of positionRaw.trim()) {
         if (ch < "0" || ch > "9") {
@@ -74,8 +78,7 @@ function array() {
     }
 
     const position = Number(positionRaw);
-
-    if (position < 0) {
+    if(position < 0){
         showError("positive number only allowed");
         return;
     }
