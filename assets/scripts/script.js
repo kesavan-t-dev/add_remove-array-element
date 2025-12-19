@@ -52,6 +52,12 @@ function array() {
         return;
     }
 
+    
+    if (hasInvalidSignUsage(sentence)) {
+         showError("Invalid input");
+    return;
+    }
+
     if (positionRaw.trim().length === 0) {
         showError("Please enter the position");
         return;
@@ -77,6 +83,8 @@ function array() {
         showError("please enter valid position");
         return;
     }
+
+
 
     if (position > words.length) {
         showError(`Enter position between 1 to ${words.length}`);
@@ -150,6 +158,31 @@ function hasLetter(text) {
 }
 
 
+function hasInvalidSignUsage(sentence) {
+    let parts = sentence.split(",");
+    
+    for (let part of parts) {
+        part = part.trim();
+        
+        let plusCount = 0;
+        let minusCount = 0;
+        
+        for (let i = 0; i < part.length; i++) {
+            let ch = part[i];
+            
+            if (ch === "+") {
+                plusCount++;
+                if (i !== 0 || plusCount > 1) return true;
+            }
+            
+            if (ch === "-") {
+                minusCount++;
+                if (i !== 0 || minusCount > 1) return true;
+            }
+        }
+    }
+    return false;
+}
 
 function showError(message) {
     const errorMsg = document.getElementById("error_msg");
