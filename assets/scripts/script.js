@@ -103,13 +103,10 @@ function array() {
         return;
     }
 
-    if (hasNumber(replacement)) {
-        showError("Invalid input");
-        return;
-    }
+    
     
     if ((hasLetter(sentence) && hasNumber(replacement)) || hasLetter(replacement) && hasNumber(sentence) ) {
-        showError("Invalid input");
+        showError("Invalid replacement input");
         return;
     }
 
