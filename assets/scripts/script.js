@@ -57,39 +57,38 @@ function array() {
          showError("Invalid input");
     return;
     }
+   
 
     if (positionRaw.trim().length === 0) {
-        showError("Please enter the position");
-        return;
-    }
-    if (hasLetter(positionRaw)) {
-        showError("Numbers only allowed")
-        return;
+    showError("Please enter the position");
+    return;
     }
 
-    for (let ch of positionRaw.trim()) {
-        if (ch < "0" || ch > "9") {
-            showError("positive number only allowed");
-            return;
-        }
-    }
+    
 
-    const position = Number(positionRaw);
-    if(position < 0){
-        showError("positive number only allowed");
-    }
+    const position = parseInt(positionRaw, 10);
+
 
     if (position === 0) {
-        showError("please enter valid position");
+        showError("Please enter a valid position");
         return;
     }
 
 
+    if (position < 0) {
+        showError("Negative numbers not allowed");
+        return;
+    }
 
     if (position > words.length) {
         showError(`Enter position between 1 to ${words.length}`);
         return;
     }
+    if (!/[0-9]+$/.test(positionRaw)) {
+        showError("Special characters not allowed");
+        return;
+    }
+    
 
     if (replacementRaw.trim().length === 0) {
         showError("Please enter the replacement word");
@@ -137,6 +136,7 @@ function hasSpecialChar(text) {
     }
     return false;
 }
+
 
 function hasNumber(text) {
     for (let ch of text) {
