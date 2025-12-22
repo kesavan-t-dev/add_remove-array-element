@@ -64,6 +64,10 @@ function array() {
     return;
     }
 
+    if (hasLetter(positionRaw)) {
+        showError("In position Positive only allowed");
+        return;
+    }
     if (!/[0-9]+$/.test(positionRaw)) {
         showError("Special characters not allowed");
         return;
@@ -72,17 +76,28 @@ function array() {
 
     const position = parseInt(positionRaw, 10);
 
+    
+
+    if (position < 0) {
+        showError("In position Negative numbers not allowed");
+        return;
+    }
+
+    if (!isValidNumber(position)) {
+            showError("Special characters not allowed");
+            return;
+        }
+    
 
     if (position === 0) {
         showError("Please enter a valid position");
         return;
     }
 
-
-    if (position < 0) {
-        showError("Negative numbers not allowed");
-        return;
-    }
+    // if(isValidPosition){
+    //     showError("Special characters not allowed");
+    //     return;
+    // }
 
     if (position > words.length) {
         showError(`Enter position between 1 to ${words.length}`);
@@ -160,6 +175,29 @@ function hasLetter(text) {
     }
     return false;
 }
+
+function isValidNumber(value) { 
+   return /^[-+]?\d+(\.\d+)?$/.test(value); 
+}
+
+// function isValidPosition(value) {
+//     if (value.length === 0) return false;
+
+//     for (let i = 0; i < value.length; i++) {
+//         const ch = value[i];
+
+        
+//         if (ch < "0" || ch > "9") {
+//             return false;
+//         }
+//     }
+
+   
+//     const num = parseInt(value, 10);
+
+//     return num > 0;
+// }
+
 
 function hasInvalidSignUsage(sentence) {
     let parts = sentence.split(",");
