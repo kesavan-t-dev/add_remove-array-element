@@ -64,6 +64,10 @@ function array() {
     return;
     }
 
+    if (!/[0-9]+$/.test(positionRaw)) {
+        showError("Special characters not allowed");
+        return;
+    }
     
 
     const position = parseInt(positionRaw, 10);
@@ -84,10 +88,7 @@ function array() {
         showError(`Enter position between 1 to ${words.length}`);
         return;
     }
-    if (!/[0-9]+$/.test(positionRaw)) {
-        showError("Special characters not allowed");
-        return;
-    }
+    
     
 
     if (replacementRaw.trim().length === 0) {
