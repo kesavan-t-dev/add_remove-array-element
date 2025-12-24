@@ -67,22 +67,22 @@ function has_special_char(text) {
     const isLetter = (ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z");
     const isDigit = (ch >= "0" && ch <= "9");
     const special_char = ch === "," || ch === " " || ch === "+" || ch === "-";
-    if (!isLetter && !isDigit && !special_char) return true;
-    }
+        if (!isLetter && !isDigit && !special_char) return true;
+        }
     return false;
 }
 
 function has_number(text) {
     for (let ch of text) {
-    if (ch >= "0" && ch <= "9") return true;
-    }
+        if (ch >= "0" && ch <= "9") return true;
+        }
     return false;
 }
 
 function has_letter(text) {
     for (let ch of text) {
-    if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")) return true;
-    }
+        if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")) return true;
+        }
     return false;
 }
 
