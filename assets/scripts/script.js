@@ -51,8 +51,7 @@ function array() {
         showError("Invalid input");
         return;
     }
-
-    
+ 
     if (hasInvalidSignUsage(sentence)) {
          showError("Invalid input");
     return;
@@ -83,29 +82,16 @@ function array() {
         return;
     }
 
-    if (!isValidNumber(position)) {
-            showError("Special characters not allowed");
-            return;
-        }
-    
-
     if (position === 0) {
         showError("Please enter a valid position");
         return;
     }
 
-    // if(isValidPosition){
-    //     showError("Special characters not allowed");
-    //     return;
-    // }
-
     if (position > words.length) {
         showError(`Enter position between 1 to ${words.length}`);
         return;
     }
-    
-    
-
+ 
     if (replacementRaw.trim().length === 0) {
         showError("Please enter the replacement word");
         return;
@@ -118,6 +104,10 @@ function array() {
         return;
     }
 
+        if (!valid_position(positionRaw)) {
+        showError("Special characters not allowed");
+        return;
+    }
     
     
     if ((hasLetter(sentence) && hasNumber(replacement)) || hasLetter(replacement) && hasNumber(sentence) ) {
@@ -180,23 +170,31 @@ function isValidNumber(value) {
    return /^[-+]?\d+(\.\d+)?$/.test(value); 
 }
 
-// function isValidPosition(value) {
-//     if (value.length === 0) return false;
+function valid_position(value) {
+    let part = value.toString();
 
-//     for (let i = 0; i < value.length; i++) {
-//         const ch = value[i];
+    let plusCount = 0;
+    let minusCount = 0;
 
-        
-//         if (ch < "0" || ch > "9") {
-//             return false;
-//         }
-//     }
+    for (let i = 0; i < part.length; i++) {
+        const ch = part[i];
+        console.log("ch "+ch);
+        if (ch === "+") {
+            plusCount++;
+            console.log("Plus count "+ plusCount);
+            if (plusCount > 1) return true;
+        } 
+        else if (ch === "-") {
+            minusCount++;
+            if (minusCount > 1 || i !== 0) return true;
+        }
+        console.log("part value "+ part);
+    }
 
-   
-//     const num = parseInt(value, 10);
+    return false; 
+}
 
-//     return num > 0;
-// }
+
 
 
 function hasInvalidSignUsage(sentence) {
