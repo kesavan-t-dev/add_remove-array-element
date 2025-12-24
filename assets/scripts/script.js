@@ -97,7 +97,7 @@ function array() {
     return;
     }
 
-    if ((has_letter(sentence) && has_number(replacement)) || (has_letter(replacement) && hasNumber(sentence))) {
+    if ((has_letter(sentence) && has_number(replacement)) || (has_letter(replacement) && has_number(sentence))) {
     showError("Invalid replacement input");
     return;
     }
