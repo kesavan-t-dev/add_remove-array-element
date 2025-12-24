@@ -7,114 +7,48 @@ function array() {
     errorMsg.classList.add("d-none");
     errorMsg.classList.replace("alert-success", "alert-danger");
 
+    let sentence = input.trim();
+    const normalized = has_commas(sentence);
+    
+    const after_trim = positionRaw.trim();
+
+    let words = normalized.split(",").filter(w => w !== "");
+    
+    const position = parseInt(after_trim, 10); 
+    
+    const replacement = replacementRaw.trim();
+
     if (input.trim().length === 0) {
         showError("Please enter a sentence");
         return;
-    }
-
-
-    let sentence = input.trim();
-
-    if (sentence.startsWith(",") || sentence.endsWith(",")) {
+    } else if (sentence.startsWith(","|| "-") || sentence.endsWith("," || "-") || has_special_char(sentence) || invalid_sign(sentence) || invalid_sign(words) || !/^\+?\d+$/.test(after_trim) || has_special_char(replacement) || invalid_sign(replacement)) {
         showError("Special Character(s) not allowed");
         return;
-    }
-
-    if (hasSpecialChar(sentence)) {
-        showError("Special Character(s) not allowed");
-        return;
-    }
-
-    let normalized = "";
-    let prevComma = false;
-    
-    for (let ch of sentence) {
-        if (ch === "," || ch === " ") {
-            if (!prevComma) {
-                normalized += ",";
-                prevComma = true;
-            }
-        } else {
-            normalized += ch;
-            prevComma = false;
-        }
-    }
-
-    let words = normalized.split(",").filter(w => w !== "");
-
-    if (words.length === 1) {
+    } else if (words.length === 1) {
         showError("Enter more than one word");
         return;
-    }
-
-    if ((hasLetter(sentence) && hasNumber(sentence))) {
+    } else if ((has_letter(sentence) && has_number(sentence)) || position_sign(words)) {
         showError("Invalid input");
         return;
-    }
- 
-    if (hasInvalidSignUsage(sentence)) {
-         showError("Invalid input");
-    return;
-    }
-   
-
-    if (positionRaw.trim().length === 0) {
-    showError("Please enter the position");
-    return;
-    }
-
-    if (hasLetter(positionRaw)) {
-        showError("In position Positive only allowed");
+    } else if (after_trim.length === 0) {
+        showError("Please enter the position");
         return;
-    }
-    if (!/[0-9]+$/.test(positionRaw)) {
-        showError("Special characters not allowed");
-        return;
-    }
-    
-
-    const position = parseInt(positionRaw, 10);
-
-    
-
-    if (position < 0) {
+    } else if (/^-/.test(after_trim)) {
         showError("In position Negative numbers not allowed");
         return;
-    }
-
-    if (position === 0) {
+    } else if (position === 0) {
         showError("Please enter a valid position");
         return;
-    }
-
-    if (position > words.length) {
+    } else if (position > words.length) {
         showError(`Enter position between 1 to ${words.length}`);
         return;
-    }
- 
-    if (replacementRaw.trim().length === 0) {
+    } else if (replacementRaw.trim().length === 0) {
         showError("Please enter the replacement word");
         return;
-    }
-
-    const replacement = replacementRaw.trim();
-
-    if (hasSpecialChar(replacement)) {
-        showError("Special Character(s) not allowed");
-        return;
-    }
-
-        if (!valid_position(positionRaw)) {
-        showError("Special characters not allowed");
-        return;
-    }
-    
-    
-    if ((hasLetter(sentence) && hasNumber(replacement)) || hasLetter(replacement) && hasNumber(sentence) ) {
+    } else if ((has_letter(sentence) && has_number(replacement)) || (has_letter(replacement) && has_number(sentence)) || position_sign(replacement)) {
         showError("Invalid replacement input");
         return;
     }
-
 
     words.splice(position - 1, 1, replacement);
 
@@ -123,102 +57,63 @@ function array() {
     errorMsg.classList.replace("alert-danger", "alert-success");
 }
 
+function has_commas(text) {
+    return text
+    .replace(/[,\s]+/g, ",");
+}
 
-function hasSpecialChar(text) {
+function has_special_char(text) {
     for (let ch of text) {
-        const code = ch.charCodeAt(0);
-        if (
-            !(code >= 65 && code <= 90) &&   
-            !(code >= 97 && code <= 122) &&  
-            !(code >= 48 && code <= 57) &&   
-            ch !== "," &&
-            ch !== "." &&
-            ch !== "-" &&
-            ch !== "+" &&
-            ch !== " "
-        ) {
-            return true;
-        }
+    const isLetter = (ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z");
+    const isDigit = (ch >= "0" && ch <= "9");
+    const special_char = ch === "," || ch === " " || ch === "+" || ch === "-";
+    if (!isLetter && !isDigit && !special_char) return true;
     }
     return false;
 }
 
-
-function hasNumber(text) {
+function has_number(text) {
     for (let ch of text) {
-        const code = ch.charCodeAt(0);
-        if ((ch >= "0" && ch <= "9")
-        ) {
-            return true;
-        }
+    if (ch >= "0" && ch <= "9") return true;
     }
     return false;
 }
 
-function hasLetter(text) {
+function has_letter(text) {
     for (let ch of text) {
-        const code = ch.charCodeAt(0);
-        if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")
-        ) {
-            return true;
-        }
+    if ((ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z")) return true;
     }
     return false;
 }
 
-function isValidNumber(value) { 
-   return /^[-+]?\d+(\.\d+)?$/.test(value); 
-}
-
-function valid_position(value) {
-    let part = value.toString();
-
-    let plusCount = 0;
-    let minusCount = 0;
-
+function invalid_sign(words) {
+    for (let part of words) {
+    let plusCount = 0, minusCount = 0;
     for (let i = 0; i < part.length; i++) {
         const ch = part[i];
-        console.log("ch "+ch);
-        if (ch === "+") {
-            plusCount++;
-            console.log("Plus count "+ plusCount);
-            if (plusCount > 1) return true;
-        } 
-        else if (ch === "-") {
-            minusCount++;
-            if (minusCount > 1 || i !== 0) return true;
-        }
-        console.log("part value "+ part);
+        if (ch === "+") plusCount++;
+        else if (ch === "-") minusCount++;
     }
-
-    return false; 
+    if (plusCount > 1 || minusCount > 1) return true;
+    if (plusCount >= 1 && minusCount >= 1) return true;
+    }
+    return false;
 }
 
-
-
-
-function hasInvalidSignUsage(sentence) {
-    let parts = sentence.split(",");
-    
-    for (let part of parts) {
-        part = part.trim();
-        
-        let plusCount = 0;
-        let minusCount = 0;
-        
-        for (let i = 0; i < part.length; i++) {
-            let ch = part[i];
-            
-            if (ch === "+") {
-                plusCount++;
-                if (i !== 0 || plusCount > 1) return true;
-            }
-            
-            if (ch === "-") {
-                minusCount++;
-                if (i !== 0 || minusCount > 1) return true;
-            }
+function position_sign(words) {
+    for (let part of words) {
+    for (let i = 0; i < part.length; i++) {
+        const ch = part[i];
+        if ((ch === "+" || ch === "-") && i !== 0) {
+        return true; 
         }
+    }
+    if (part.length > 1 && (part[0] === "+" || part[0] === "-")) {
+        const rest = part.slice(1);
+        for (let ch of rest) {
+        if (!(ch >= "0" && ch <= "9")) return true; 
+        }
+    }
     }
     return false;
 }
@@ -234,5 +129,8 @@ function resetForm() {
     document.getElementById("user_input_one").value = "";
     document.getElementById("user_input_two").value = "";
     document.getElementById("user_input_three").value = "";
-    document.getElementById("error_msg").classList.add("d-none");
+    const errorMsg = document.getElementById("error_msg");
+    errorMsg.classList.add("d-none");
+    errorMsg.classList.replace("alert-success", "alert-danger");
+    errorMsg.innerText = "";
 }
