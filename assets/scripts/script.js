@@ -111,8 +111,7 @@ function array() {
 
 function has_commas(text) {
     return text
-    .replace(/[,\s]+/g, ",") 
-    .replace(/^,|,$/g, "");  
+    .replace(/[,\s]+/g, ",");
 }
 
 function has_special_char(text) {
