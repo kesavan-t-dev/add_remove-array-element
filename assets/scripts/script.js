@@ -36,7 +36,7 @@ function input_1(sentence, words, err_msg){
             /[+\-\.]{2,}\d$/.test(part) ||
             /\d[+\-\.]+$/.test(part) ||
             /^\d+[+\-\.]{2,}\d+$/.test(part) ||
-            /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d$/.test(part) ||
+            /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d+$/.test(part) ||
             /^[+\-]\d+[+\-]+$/.test(part) ||
             /\.\..*/.test(part) ||
             /^[+\-\.]{1,}[A-Za-z]+$/.test(part) ||
@@ -67,7 +67,7 @@ function input_2(positionRaw, words, err_msg){
     } else if(/[a-zA-Z]/.test(posTrim) && /[0-9]/.test(posTrim) ){
         err_msg.innerText = "Invalid position";
         return null;
-    } else if(/^\d+[+\-\.]{2,}\d+$/.test(posTrim) || /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d$/.test(posTrim)){
+    } else if(/^\d+[+\-\.]{2,}\d+$/.test(posTrim) || /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d+$/.test(posTrim)){
         err_msg.innerText = "Invalid position";
         return null;
     } else if(/[a-zA-Z]/.test(posTrim)){
