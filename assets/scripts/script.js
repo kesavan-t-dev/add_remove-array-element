@@ -16,6 +16,7 @@ function common_validation(sentence, position, replacement, err_msg) {
     return { sentence, position, replacement };
 }
 
+
 function input_1(sentence, words, err_msg){
     sentence = sentence.replace(/[,\s]+/g, ",");
     words = sentence.split(",").filter(w => w);
@@ -23,26 +24,16 @@ function input_1(sentence, words, err_msg){
     if (/^,|,$/.test(sentence)) {
         err_msg.innerText = "Special character(s) not allowed";
         return false;
-    } else if (sentence.length === 1) {
-        err_msg.innerText = "Please enter more than one word";
-        return false;
-    }
+    } 
 
     for (let part of words) {
         if (/^[+-]?\d+(?:\.\d+)?$/.test(part) || /^[A-Za-z]+$/.test(part)) {
             continue;
+        } else if (sentence.length === 1) {
+            err_msg.innerText = "Please enter more than one word";
+            return false;
         } else if (
-            /^[+\-\.]+$/.test(part) ||
-            /[+\-\.]{2,}\d$/.test(part) ||
-            /\d[+\-\.]+$/.test(part) ||
-            /^\d+[+\-\.]{2,}\d+$/.test(part) ||
-            /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d+$/.test(part) ||
-            /^[+\-]\d+[+\-]+$/.test(part) ||
-            /\.\..*/.test(part) ||
-            /^[+\-\.]{1,}[A-Za-z]+$/.test(part) ||
-            /^[A-Za-z]+[+\-\.]{1,}$/.test(part) ||
-            /^[A-Za-z][+\-\.][A-Za-z]{1,}$/.test(part) ||
-            /^[+\-\.][A-Za-z][+\-\.]$/.test(part)
+            /^(?:\.\d+|[+\-]\.\d+|[+\-]\.[+\-]\d+|[+\-]\.$|[+\-]{2,}|[+\-\.]+|.*\d[+\-\.]+$|\d+(?:[+\-\.]{2,}\d+|[+\-\.]{1,}\d+[+\-\.]{1,}\d+)|[+\-]\d+[+\-]+|.*\..*\..*|[A-Za-z][+\-\.][A-Za-z]|[+\-\.][A-Za-z][+\-\.]|[+\-\.]+[A-Za-z]+|[A-Za-z]+[+\-\.]+)$/.test(part)
         ) {
             err_msg.innerText = "Special character(s) not allowed";
             return false;
@@ -91,37 +82,21 @@ function input_2(positionRaw, words, err_msg){
 }
 
 function input_3(replacementRaw, sentence, err_msg){
-    const replacement = replacementRaw.trim().replace(/[,\s]+/g, ",");
+    const replacement = replacementRaw.trim();
+        
+    const invalidNumeric = /^(?:\.\d+|\d+\.|.*\..*\..*|[+\-\.]+|.*\d[+\-\.]+$|\d+(?:[+\-\.]{2,}\d+|[+\-\.]{1,}\d+[+\-\.]{1,}\d+)|[+\-]\d+[+\-]+)$/;
+    const invalidAlphaMix = /^(?:[+\-\.]+[A-Za-z]+|[A-Za-z]+[+\-\.]+|[A-Za-z][+\-\.][A-Za-z]|[+\-\.][A-Za-z][+\-\.])$/;
 
-    
-if (/^[+-]?\d+(?:\.\d+)?$/.test(replacement)) {
-    
-} else if (
-    /^\.\d+$/.test(replacement) ||
-    /^\d+\.$/.test(replacement) ||
-    /.*\..*\..*/.test(replacement) ||
-    /^[+\-\.]+$/.test(replacement) ||
-    /[+\-]{2,}\d+$/.test(replacement) ||
-    /\d+[+\-\.]+$/.test(replacement) ||
-    /^\d+[+\-\.]{2,}\d+$/.test(replacement) ||
-    /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d+$/.test(replacement) ||
-    /^[+\-]\d+[+\-]+$/.test(replacement) ||
-    /\.\..*/.test(replacement) ||
-    /^[+\-\.]{1,}[A-Za-z]+$/.test(replacementRaw) ||
-    /^[A-Za-z]+[+\-\.]{1,}$/.test(replacementRaw) ||
-    /^[A-Za-z][+\-\.][A-Za-z]{1,}$/.test(replacementRaw) ||
-    /^[+\-\.][A-Za-z][+\-\.]$/.test(replacementRaw)
-) {
-    err_msg.innerText = "Special character(s) not allowed";
-    return null;
-}
-else if (
-        ((/[A-Za-z]/.test(sentence)) && (/\d/.test(replacement))) ||
-        ((/\d/.test(sentence)) && (/[A-Za-z]/.test(replacement)))
-    ){
-        err_msg.innerText = "Invalid replacement input";
+    if (invalidNumeric.test(replacement) || invalidAlphaMix.test(replacementRaw)) {
+        err_msg.innerText = "Special character(s) not allowed";
         return null;
-    } 
+    } else if (
+            ((/[A-Za-z]/.test(sentence)) && (/\d/.test(replacement))) ||
+            ((/\d/.test(sentence)) && (/[A-Za-z]/.test(replacement)))
+        ){
+            err_msg.innerText = "Invalid replacement input";
+            return null;
+        } 
 
     return replacement;
 }
