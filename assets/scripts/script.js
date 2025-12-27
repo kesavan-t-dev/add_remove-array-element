@@ -1,4 +1,3 @@
-
 function common_validation(sentence, position, replacement, err_msg) {
     if (!sentence) {
         err_msg.innerText = "Please enter a sentence";
@@ -16,10 +15,20 @@ function common_validation(sentence, position, replacement, err_msg) {
     return { sentence, position, replacement };
 }
 
-
 function input_1(sentence, words, err_msg){
     sentence = sentence.replace(/[,\s]+/g, ",");
+
+    if (!sentence || sentence === ",") {
+        err_msg.innerText = "Please enter a valid sentence";
+        return false;
+    }
+
     words = sentence.split(",").filter(w => w);
+
+    if (words.length < 2) {
+        err_msg.innerText = "Please enter more than one word";
+        return false;
+    }
 
     if (/^,|,$/.test(sentence)) {
         err_msg.innerText = "Special character(s) not allowed";
@@ -43,12 +52,25 @@ function input_1(sentence, words, err_msg){
         }
     }
 
+    const hasAlpha = words.some(w => /^[A-Za-z]+$/.test(w));
+    const hasNumeric = words.some(w => /^\d+$/.test(w));
+
+    if (hasAlpha && hasNumeric) {
+        err_msg.innerText = "Mixed word types not allowed";
+        return false;
+    }
+
     return { sentence, words };
 }
 
 function input_2(positionRaw, words, err_msg){
+
+    if (!positionRaw.trim()) {
+        err_msg.innerText = "Please enter a position";
+        return null;
+    }
+
     const posTrim = positionRaw.trim();
-    
     if (/^[+\-]{2,}\d/.test(posTrim) || /\d[+\-\.]{1,}$/.test(posTrim) || /^\d+[+-]\d+$/.test(posTrim) ) {
         err_msg.innerText = "Special character(s) not allowed";
         return null;
@@ -65,6 +87,7 @@ function input_2(positionRaw, words, err_msg){
         err_msg.innerText = "In position letter(s) not allowed";
         return null;
     }
+
     if (!/^\d+$/.test(posTrim)) {
         err_msg.innerText = "Invalid position";
         return null;
@@ -98,6 +121,12 @@ function input_3(replacementRaw, sentence, err_msg){
             return null;
         } 
 
+    const words = sentence.split(",").map(w => w.trim());
+    if (words.includes(replacement)) {
+        err_msg.innerText = "Replacement word already exists";
+        return null;
+    }
+
     return replacement;
 }
 
@@ -128,13 +157,12 @@ function array() {
     words = input1Result.words;
     
     const positionResult = input_2(positionRaw, words, err_msg);
-     console.log(positionResult);
     if (!positionResult) {
         err_msg.classList.remove("d-none");
         return;
     }
     const { position } = positionResult;
-    console.log(position);
+
     const replacement = input_3(replacementRaw, sentence, err_msg);
     if (replacement === null) {
         err_msg.classList.remove("d-none");
