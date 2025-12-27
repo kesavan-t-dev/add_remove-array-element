@@ -1,3 +1,4 @@
+
 function common_validation(sentence, position, replacement, err_msg) {
     if (!sentence) {
         err_msg.innerText = "Please enter a sentence";
@@ -15,9 +16,8 @@ function common_validation(sentence, position, replacement, err_msg) {
     return { sentence, position, replacement };
 }
 
-
 function input_1(sentence, words, err_msg){
-    sentence = sentence.replace(/[,\s]+/g, ",").replace(/\.{2,}/g, ".");
+    sentence = sentence.replace(/[,\s]+/g, ",");
     words = sentence.split(",").filter(w => w);
 
     if (/^,|,$/.test(sentence)) {
@@ -32,10 +32,11 @@ function input_1(sentence, words, err_msg){
         if (/^[+-]?\d+(?:\.\d+)?$/.test(part) || /^[A-Za-z]+$/.test(part)) {
             continue;
         } else if (
-            /^[+\-.]+$/.test(part) ||
+            /^[+\-\.]+$/.test(part) ||
             /[+\-\.]{2,}\d$/.test(part) ||
             /\d[+\-\.]+$/.test(part) ||
-            /^\d+[+\-]\d+$/.test(part) ||
+            /^\d+[+\-\.]{2,}\d+$/.test(part) ||
+            /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d$/.test(part) ||
             /^[+\-]\d+[+\-]+$/.test(part) ||
             /\.\..*/.test(part) ||
             /^[+\-\.]{1,}[A-Za-z]+$/.test(part) ||
@@ -54,23 +55,30 @@ function input_1(sentence, words, err_msg){
     return { sentence, words };
 }
 
-
 function input_2(positionRaw, words, err_msg){
     const posTrim = positionRaw.trim();
     
-    if (/^[+\-]{2,}\d/.test(posTrim) || /\d[+\-]{1,}$/.test(posTrim) || /^\d+[+-]\d+$/.test(posTrim) ) {
+    if (/^[+\-]{2,}\d/.test(posTrim) || /\d[+\-\.]{1,}$/.test(posTrim) || /^\d+[+-]\d+$/.test(posTrim) ) {
         err_msg.innerText = "Special character(s) not allowed";
         return null;
     } else if (/-/.test(posTrim)) {
         err_msg.innerText = "Negative numbers not allowed";
         return null;
-    } else if(/[a-zA-Z]/.test(posTrim)&& /[0-9]/.test(posTrim) ){
+    } else if(/[a-zA-Z]/.test(posTrim) && /[0-9]/.test(posTrim) ){
+        err_msg.innerText = "Invalid position";
+        return null;
+    } else if(/^\d+[+\-\.]{2,}\d+$/.test(posTrim) || /^\d+[+\-\.]{1,}\d+[+\-\.]{1,}\d$/.test(posTrim)){
         err_msg.innerText = "Invalid position";
         return null;
     } else if(/[a-zA-Z]/.test(posTrim)){
         err_msg.innerText = "In position letter(s) not allowed";
         return null;
-    }   
+    }
+    if (!/^\d+$/.test(posTrim)) {
+        err_msg.innerText = "Invalid position";
+        return null;
+    }
+
     const position = parseInt(posTrim, 10);
     if (position === 0) {
         err_msg.innerText = "Please enter a valid position";
@@ -100,20 +108,15 @@ function input_3(replacementRaw, sentence, err_msg){
         err_msg.innerText = "Special character(s) not allowed";
         return null;
     } else if (
-        ((/[A-Za-z]/.test(sentence)) && (/^[+-]?\d+(?:\.\d+)?$/.test(replacement))) ||
+        ((/[A-Za-z]/.test(sentence)) && (/\d/.test(replacement))) ||
         ((/\d/.test(sentence)) && (/[A-Za-z]/.test(replacement)))
     ){
         err_msg.innerText = "Invalid replacement input";
         return null;
-    } else if (!/^[+-]?\d+(?:\.\d+)?$/.test(replacement)){
-        err_msg.innerText = "Invalid replacement input";
-        return null;
-    }
+    } 
 
     return replacement;
 }
-
-
 
 function array() {
     const inputRaw = document.getElementById("user_input_one").value.trim();
@@ -134,18 +137,21 @@ function array() {
     let words = sentence.split(",").filter(w => w);
     
     const input1Result = input_1(sentence, words, err_msg);
-    if (!input_1(sentence, words, err_msg)) {
+    if (!input1Result) {
         err_msg.classList.remove("d-none");
         return;
     }
     sentence = input1Result.sentence;
     words = input1Result.words;
     
-    const position = input_2(positionRaw, words, err_msg);
-    if (position === null) {
+    const positionResult = input_2(positionRaw, words, err_msg);
+     console.log(positionResult);
+    if (!positionResult) {
         err_msg.classList.remove("d-none");
         return;
     }
+    const { position } = positionResult;
+    console.log(position);
     const replacement = input_3(replacementRaw, sentence, err_msg);
     if (replacement === null) {
         err_msg.classList.remove("d-none");
