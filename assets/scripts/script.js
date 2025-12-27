@@ -2,43 +2,58 @@ function common_validation(sentence, position, replacement, err_msg) {
     if (!sentence) {
         err_msg.innerText = "Please enter a sentence";
         return null;
+    } else if (/[^a-zA-Z0-9.,\s+-]/.test(sentence) || /[^a-zA-Z0-9\s+-.]/.test(position) || /[^a-zA-Z0-9\s+-.]/.test(replacement)) {
+        err_msg.innerText = "Special character(s) not allowed";
+        return null;
     } else if (!position) {
         err_msg.innerText = "Please enter a position";
         return null;
     } else if (!replacement){
         err_msg.innerText = "Please enter the replacement word";
         return null;
-    } else if (/[^a-zA-Z0-9.,\s+-]/.test(sentence) || /[^a-zA-Z0-9\s+-.]/.test(position) || /[^a-zA-Z0-9\s+-.]/.test(replacement)) {
-        err_msg.innerText = "Special character(s) not allowed";
-        return null;
     }
     return { sentence, position, replacement };
 }
 
-function input_1(sentence, words,  err_msg){
+
+function input_1(sentence, words, err_msg){
     sentence = sentence.replace(/[,\s]+/g, ",").replace(/\.{2,}/g, ".");
     words = sentence.split(",").filter(w => w);
 
     if (/^,|,$/.test(sentence)) {
         err_msg.innerText = "Special character(s) not allowed";
         return false;
+    } else if (sentence.length === 1) {
+        err_msg.innerText = "Please enter more than one word";
+        return false;
     }
+
     for (let part of words) {
-        if (/^\d+(\.\d+)?$/.test(part) || /^[+-]\d+(\.\d+)?$/.test(part) || /^[a-zA-Z]+$/.test(part) ) {
+        if (/^[+-]?\d+(?:\.\d+)?$/.test(part) || /^[A-Za-z]+$/.test(part)) {
             continue;
-        } else if (/^[+-]$/.test(part) || /^[+-][^0-9]/.test(part) || 
-            /^\d+[+-]$/.test(part) || /^\d+[+-]\d+$/.test(part) || 
-            /\.\..*/.test(part) || /^\w+[+-.]$/.test(part) || /^\w[+-.]\w+$/.test(part)) {
+        } else if (
+            /^[+\-.]+$/.test(part) ||
+            /[+\-\.]{2,}\d$/.test(part) ||
+            /\d[+\-\.]+$/.test(part) ||
+            /^\d+[+\-]\d+$/.test(part) ||
+            /^[+\-]\d+[+\-]+$/.test(part) ||
+            /\.\..*/.test(part) ||
+            /^[+\-\.]{1,}[A-Za-z]+$/.test(part) ||
+            /^[A-Za-z]+[+\-\.]{1,}$/.test(part) ||
+            /^[A-Za-z][+\-\.][A-Za-z]{1,}$/.test(part) ||
+            /^[+\-\.][A-Za-z][+\-\.]$/.test(part)
+        ) {
             err_msg.innerText = "Special character(s) not allowed";
             return false;
-        } else if(/\w+\d/.test(sentence)){
+        } else if (/^(?=.*[A-Za-z])(?=.*\d).+$/.test(part)) {
             err_msg.innerText = "Invalid input";
             return false;
         }
     }
-    return { sentence, words };
 
+    return { sentence, words };
 }
+
 
 function input_2(positionRaw, words, err_msg){
     const posTrim = positionRaw.trim();
@@ -49,7 +64,13 @@ function input_2(positionRaw, words, err_msg){
     } else if (/-/.test(posTrim)) {
         err_msg.innerText = "Negative numbers not allowed";
         return null;
-    }
+    } else if(/[a-zA-Z]/.test(posTrim)&& /[0-9]/.test(posTrim) ){
+        err_msg.innerText = "Invalid position";
+        return null;
+    } else if(/[a-zA-Z]/.test(posTrim)){
+        err_msg.innerText = "In position letter(s) not allowed";
+        return null;
+    }   
     const position = parseInt(posTrim, 10);
     if (position === 0) {
         err_msg.innerText = "Please enter a valid position";
@@ -58,33 +79,46 @@ function input_2(positionRaw, words, err_msg){
         err_msg.innerText = `Enter position between 1 to ${words.length}`;
         return null;
     }
-    return position;
+    return {position};
 }
 
 function input_3(replacementRaw, sentence, err_msg){
     const replacement = replacementRaw.trim().replace(/[,\s]+/g, ",").replace(/\.{2,}/g, ".");
-    
-    if (/^[+-.]\w+$/.test(replacementRaw)|| /^\w+[+-.]$/.test(replacementRaw) || /^\w[+-.]\w+$/.test(replacementRaw )) {
+
+    if (
+        /^[+\-.]+$/.test(replacement) ||
+        /[+\-\.]{2,}\d$/.test(replacement) ||
+        /\d[+\-\.]+$/.test(replacement) ||
+        /^\d+[+\-]\d+$/.test(replacement) ||
+        /^[+\-]\d+[+\-]+$/.test(replacement) ||
+        /\.\..*/.test(replacement) ||
+        /^[+\-\.]{1,}[A-Za-z]+$/.test(replacementRaw) ||
+        /^[A-Za-z]+[+\-\.]{1,}$/.test(replacementRaw) ||
+        /^[A-Za-z][+\-\.][A-Za-z]{1,}$/.test(replacementRaw) ||
+        /^[+\-\.][A-Za-z][+\-\.]$/.test(replacementRaw)
+    ){
+        err_msg.innerText = "Special character(s) not allowed";
+        return null;
+    } else if (
+        ((/[A-Za-z]/.test(sentence)) && (/^[+-]?\d+(?:\.\d+)?$/.test(replacement))) ||
+        ((/\d/.test(sentence)) && (/[A-Za-z]/.test(replacement)))
+    ){
         err_msg.innerText = "Invalid replacement input";
         return null;
-    } else if (/\.\..*/.test(replacement)) {    
-        err_msg.innerText = "Invalid replacement input";
-        return null;
-    } else if ((/[a-zA-Z]/.test(sentence) && /\d/.test(replacement)) ||
-        (/\d/.test(sentence) && /[a-zA-Z]/.test(replacement))) {
+    } else if (!/^[+-]?\d+(?:\.\d+)?$/.test(replacement)){
         err_msg.innerText = "Invalid replacement input";
         return null;
     }
 
     return replacement;
-
 }
 
 
+
 function array() {
-    const inputRaw = document.getElementById("user_input_one").value;
-    const positionRaw = document.getElementById("user_input_two").value;
-    const replacementRaw = document.getElementById("user_input_three").value;
+    const inputRaw = document.getElementById("user_input_one").value.trim();
+    const positionRaw = document.getElementById("user_input_two").value.trim();
+    const replacementRaw = document.getElementById("user_input_three").value.trim();
     const err_msg = document.getElementById("error_msg");
 
     err_msg.classList.add("d-none");
