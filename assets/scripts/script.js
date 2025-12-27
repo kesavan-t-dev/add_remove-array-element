@@ -47,7 +47,7 @@ function input_1(sentence, words, err_msg){
             err_msg.innerText = "Special character(s) not allowed";
             return false;
         } else if (/^(?=.*[A-Za-z])(?=.*\d).+$/.test(part)) {
-            err_msg.innerText = "Invalid input";
+            err_msg.innerText = "Invalid input type";
             return false;
         }
     }
@@ -56,7 +56,7 @@ function input_1(sentence, words, err_msg){
     const hasNumeric = words.some(w => /^\d+$/.test(w));
 
     if (hasAlpha && hasNumeric) {
-        err_msg.innerText = "Mixed word types not allowed";
+        err_msg.innerText = "Invalid input type";
         return false;
     }
 
@@ -121,11 +121,7 @@ function input_3(replacementRaw, sentence, err_msg){
             return null;
         } 
 
-    const words = sentence.split(",").map(w => w.trim());
-    if (words.includes(replacement)) {
-        err_msg.innerText = "Replacement word already exists";
-        return null;
-    }
+    
 
     return replacement;
 }
