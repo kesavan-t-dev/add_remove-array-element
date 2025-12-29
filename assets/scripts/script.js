@@ -1,8 +1,13 @@
+
 function common_validation(sentence, position, replacement, err_msg) {
     if (!sentence) {
         err_msg.innerText = "Please enter a sentence";
         return null;
-    } else if (/[^a-zA-Z0-9.,\s+-]/.test(sentence) || /[^a-zA-Z0-9\s+-.]/.test(position) || /[^a-zA-Z0-9\s+-.]/.test(replacement)) {
+    } else if (
+        /[^a-zA-Z0-9.,\s+\-]/.test(sentence) ||     
+        /[^a-zA-Z0-9\s+\-.]/.test(position) ||      
+        /[^a-zA-Z0-9\s+\-.]/.test(replacement)      
+    ) {
         err_msg.innerText = "Special character(s) not allowed";
         return null;
     } else if (!position) {
@@ -17,7 +22,6 @@ function common_validation(sentence, position, replacement, err_msg) {
 
 function input_1(sentence, words, err_msg) {
     sentence = sentence.toString();
-
     {
         let out = '';
         let prev = false;
@@ -36,12 +40,10 @@ function input_1(sentence, words, err_msg) {
         }
         sentence = out;
     }
-
     if (sentence.length === 0 || sentence === ',') {
         err_msg.innerText = 'Please enter a valid sentence';
         return false;
     }
-
     words = sentence.split(',').filter(part => part.length > 0);
 
     if (words.length < 2 || sentence.length === 1) {
@@ -54,14 +56,18 @@ function input_1(sentence, words, err_msg) {
 
     for (let idx = 0; idx < words.length; idx++) {
         const part = words[idx];
+        let start = 0;
+        let dotCount = 0;
+        let hasL = false;
+        let hasD = false;
 
-        for (let i = 0, n = part.length; i < n; i++) {
-            if (part[i] === '.') {
+        if (part.length > 0 && (part[0] === '+' || part[0] === '-')) {
+            start = 1;
+            if (part.length === 1) {
                 err_msg.innerText = 'Special character(s) not allowed';
                 return false;
             }
         }
-
         for (let i = 1, n = part.length; i < n; i++) {
             const c = part[i];
             if (c === '+' || c === '-') {
@@ -69,39 +75,52 @@ function input_1(sentence, words, err_msg) {
                 return false;
             }
         }
+        for (let i = 0, n = part.length; i < n; i++) {
+            const ch = part[i];
+            const code = ch.charCodeAt(0);
+            const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+            const is_digit  = (code >= 48 && code <= 57);
 
-        {
-            let start = 0;
-            if (part.length > 0 && (part[0] === '+' || part[0] === '-')) start = 1;
-
-            for (let i = start, n = part.length; i < n; i++) {
-                const ch = part[i];
-                const code = ch.charCodeAt(0);
-                const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-                const is_digit  = (code >= 48 && code <= 57);
-                if (!is_letter && !is_digit) {
+            if (is_letter) {
+                hasL = true;
+                continue;
+            } else if (is_digit) {
+                hasD = true;
+                continue;
+            } else if (ch === '.') {
+                dotCount++;
+                if (dotCount > 1) {
                     err_msg.innerText = 'Special character(s) not allowed';
                     return false;
                 }
+                const b_index = i - 1;
+                const a_index  = i + 1;
+                if (b_index < start || a_index >= n) {
+                    err_msg.innerText = 'Special character(s) not allowed';
+                    return false;
+                }
+                const beforeCode = part[b_index].charCodeAt(0);
+                const afterCode  = part[a_index].charCodeAt(0);
+                const beforeIsDigit = (beforeCode >= 48 && beforeCode <= 57);
+                const afterIsDigit  = (afterCode  >= 48 && afterCode  <= 57);
+                if (!beforeIsDigit || !afterIsDigit) {
+                    err_msg.innerText = 'Special character(s) not allowed';
+                    return false;
+                }
+                hasD = true;
+                continue;
             }
+
+            err_msg.innerText = 'Special character(s) not allowed';
+            return false;
         }
 
-        {
-            let hasL = false;
-            let hasD = false;
-            let start = 0;
-            if (part.length > 0 && (part[0] === '+' || part[0] === '-')) start = 1;
-            for (let i = start, n = part.length; i < n; i++) {
-                const code = part[i].charCodeAt(0);
-                const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-                const is_digit  = (code >= 48 && code <= 57);
-                if (is_letter) hasL = true;
-                else if (is_digit) hasD = true;
-            }
-            if (hasL && hasD) {
-                err_msg.innerText = 'Invalid input type';
-                return false;
-            }
+        if (hasL && hasD) {
+            err_msg.innerText = 'Invalid input type';
+            return false;
+        } else if (hasL && (start === 1 || dotCount > 0)) {
+            err_msg.innerText = 'Special character(s) not allowed';
+            return false;
         }
     }
 
@@ -110,6 +129,7 @@ function input_1(sentence, words, err_msg) {
 
     for (let w = 0; w < words.length; w++) {
         const part = words[w];
+
         {
             let all_letters = part.length > 0;
             for (let i = 0, n = part.length; i < n; i++) {
@@ -119,21 +139,41 @@ function input_1(sentence, words, err_msg) {
             }
             if (all_letters) has_alpha = true;
         }
+
         {
-            let is_signed_int = part.length > 0;
+            let is_signed_numeric = part.length > 0;
             let start = 0;
-            if (is_signed_int && (part[0] === '+' || part[0] === '-')) {
-                if (part.length === 1) is_signed_int = false;
+            let dotCount = 0;
+
+            if (is_signed_numeric && (part[0] === '+' || part[0] === '-')) {
+                if (part.length === 1) is_signed_numeric = false;
                 else start = 1;
             }
-            if (is_signed_int) {
+            if (is_signed_numeric) {
                 for (let i = start, n = part.length; i < n; i++) {
-                    const code = part[i].charCodeAt(0);
-                    const is_digit = (code >= 48 && code <= 57);
-                    if (!is_digit) { is_signed_int = false; break; }
+                    const ch = part[i];
+                    const code = ch.charCodeAt(0);
+                    const isDigit = (code >= 48 && code <= 57);
+
+                    if (isDigit) continue;
+
+                    if (ch === '.') {
+                        dotCount++;
+                        if (dotCount > 1) { is_signed_numeric = false; break; }
+                        const b_index = i - 1;
+                        const a_index  = i + 1;
+                        if (b_index < start || a_index >= n) { is_signed_numeric = false; break; }
+                        const beforeCode = part[b_index].charCodeAt(0);
+                        const afterCode  = part[a_index].charCodeAt(0);
+                        const beforeIsDigit = (beforeCode >= 48 && beforeCode <= 57);
+                        const afterIsDigit  = (afterCode  >= 48 && afterCode  <= 57);
+                        if (!beforeIsDigit || !afterIsDigit) { is_signed_numeric = false; break; }
+                        continue;
+                    }
+                    is_signed_numeric = false; break;
                 }
             }
-            if (is_signed_int) has_numeric = true;
+            if (is_signed_numeric) has_numeric = true;
         }
     }
 
@@ -145,42 +185,41 @@ function input_1(sentence, words, err_msg) {
     return { sentence, words };
 }
 
-function input_2(position_raw, words, err_msg) {
-    
-    if (position_raw == null) {
+function input_2(positionRaw, words, err_msg) {
+    if (positionRaw == null) {
         err_msg.innerText = "Please enter a position";
         return null;
     }
-    let pos_trim = position_raw.toString().trim();
-    if (pos_trim.length === 0) {
+    let posTrim = positionRaw.toString().trim();
+    if (posTrim.length === 0) {
         err_msg.innerText = "Please enter a position";
         return null;
     }
 
-    let start_index = 0;
-    const first = pos_trim[0];
+    let startIndex = 0;
+    const first = posTrim[0];
 
     if (first === '+') {
-        start_index = 1;
-        if (pos_trim.length === 1) {
+        startIndex = 1;
+        if (posTrim.length === 1) {
             err_msg.innerText = "Please enter a valid position";
             return null;
-        } else if (pos_trim.length > 1 && (pos_trim[1] === '+' || pos_trim[1] === '-' || pos_trim[1] === '.')) {
+        } else if (posTrim.length > 1 && (posTrim[1] === '+' || posTrim[1] === '-' || posTrim[1] === '.')) {
             err_msg.innerText = "Special character(s) not allowed";
             return null;
         }
     } else if (first === '-') {
-        if (pos_trim.length === 1) {
+        if (posTrim.length === 1) {
             err_msg.innerText = "Negative numbers not allowed";
             return null;
         }
-        let reset_all_digits = true;
-        for (let i = 1, n = pos_trim.length; i < n; i++) {
-            const code = pos_trim[i].charCodeAt(0);
-            const is_digit = (code >= 48 && code <= 57);
-            if (!is_digit) { reset_all_digits = false; break; }
+        let restAllDigits = true;
+        for (let i = 1, n = posTrim.length; i < n; i++) {
+            const code = posTrim[i].charCodeAt(0);
+            const isDigit = (code >= 48 && code <= 57);
+            if (!isDigit) { restAllDigits = false; break; }
         }
-        if (reset_all_digits) {
+        if (restAllDigits) {
             err_msg.innerText = "Negative numbers not allowed";
             return null;
         } else {
@@ -189,12 +228,12 @@ function input_2(position_raw, words, err_msg) {
         }
     } else {
         const code = first.charCodeAt(0);
-        const is_digit = (code >= 48 && code <= 57);
-        const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-        if (is_letter) {
+        const isDigit = (code >= 48 && code <= 57);
+        const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        if (isLetter) {
             err_msg.innerText = "In position letter(s) not allowed";
             return null;
-        }else if (!is_digit) {
+        } else if (!isDigit) {
             if (first === '.') {
                 err_msg.innerText = "Special character(s) not allowed";
             } else {
@@ -204,13 +243,13 @@ function input_2(position_raw, words, err_msg) {
         }
     }
 
-    for (let i = start_index, n = pos_trim.length; i < n; i++) {
-        const ch = pos_trim[i];
+    for (let i = startIndex, n = posTrim.length; i < n; i++) {
+        const ch = posTrim[i];
         const code = ch.charCodeAt(0);
-        const is_digit = (code >= 48 && code <= 57);
-        const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-        if (is_digit) continue;
-        if (is_letter) {
+        const isDigit = (code >= 48 && code <= 57);
+        const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        if (isDigit) continue;
+        if (isLetter) {
             err_msg.innerText = "In position letter(s) not allowed";
             return null;
         } else if (ch === '.' || ch === '+' || ch === '-' || ch === ',') {
@@ -221,7 +260,7 @@ function input_2(position_raw, words, err_msg) {
         return null;
     }
 
-    const position = parseInt(pos_trim, 10);
+    const position = parseInt(posTrim, 10);
     if (position === 0) {
         err_msg.innerText = "Please enter a valid position";
         return null;
@@ -232,19 +271,19 @@ function input_2(position_raw, words, err_msg) {
     return { position };
 }
 
-function input_3(replacement_raw, sentence, err_msg) {
-    const replacement = replacement_raw.trim();
+function input_3(replacementRaw, sentence, err_msg) {
+    const replacement = replacementRaw.trim();
     if (replacement.length === 0) {
         err_msg.innerText = "Please enter a replacement";
         return null;
     }
 
-    let start_index = 0;
+    let startIndex = 0;
     let dotCount = 0;
 
     const first = replacement[0];
     if (first === '+' || first === '-') {
-        start_index = 1;
+        startIndex = 1;
         if (replacement.length === 1) {
             err_msg.innerText = "Please enter a valid replacement";
             return null;
@@ -254,8 +293,8 @@ function input_3(replacement_raw, sentence, err_msg) {
     for (let i = 0, n = replacement.length; i < n; i++) {
         const ch = replacement[i];
         const code = ch.charCodeAt(0);
-        const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-        const is_digit  = (code >= 48 && code <= 57);
+        const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        const isDigit  = (code >= 48 && code <= 57);
 
         if (ch === ',') {
             err_msg.innerText = "Special character(s) not allowed";
@@ -270,10 +309,7 @@ function input_3(replacement_raw, sentence, err_msg) {
         } else if (i > 0 && (ch === '+' || ch === '-')) {
             err_msg.innerText = "Special character(s) not allowed";
             return null;
-        } else if (!is_letter && !is_digit && ch !== '+' && ch !== '-' && ch !== '.') {
-            err_msg.innerText = "Special character(s) not allowed";
-            return null;
-        } else if (is_letter && ch !== '+' && ch !== '-' && ch !== '.') {
+        } else if (!isLetter && !isDigit && ch !== '+' && ch !== '-' && ch !== '.') {
             err_msg.innerText = "Special character(s) not allowed";
             return null;
         }
@@ -287,13 +323,13 @@ function input_3(replacement_raw, sentence, err_msg) {
     }
 
     let replacement_has_letter = false, replacement_has_digit = false;
-    for (let i = start_index, n = replacement.length; i < n; i++) {
+    for (let i = startIndex, n = replacement.length; i < n; i++) {
         const ch = replacement[i];
         const code = ch.charCodeAt(0);
-        const is_letter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-        const is_digit  = (code >= 48 && code <= 57);
-        if (is_letter) replacement_has_letter = true;
-        else if (is_digit || ch === '.') replacement_has_digit = true;
+        const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+        const isDigit  = (code >= 48 && code <= 57);
+        if (isLetter) replacement_has_letter = true;
+        else if (isDigit || ch === '.') replacement_has_digit = true;
     }
 
     if ((sentence_has_letter && replacement_has_digit) || (sentence_has_digit && replacement_has_letter)) {
@@ -305,21 +341,21 @@ function input_3(replacement_raw, sentence, err_msg) {
 }
 
 function array() {
-    const input_raw = document.getElementById("user_input_one").value.trim();
-    const position_raw = document.getElementById("user_input_two").value.trim();
-    const replacement_raw = document.getElementById("user_input_three").value.trim();
+    const inputRaw = document.getElementById("user_input_one").value.trim();
+    const positionRaw = document.getElementById("user_input_two").value.trim();
+    const replacementRaw = document.getElementById("user_input_three").value.trim();
     const err_msg = document.getElementById("error_msg");
 
     err_msg.classList.add("d-none");
     err_msg.classList.replace("alert-success", "alert-danger");
 
-    const commonResult = common_validation(input_raw, position_raw, replacement_raw, err_msg);
+    const commonResult = common_validation(inputRaw, positionRaw, replacementRaw, err_msg);
     if (!commonResult) {
         err_msg.classList.remove("d-none");
         return;
     }
 
-    let sentence = input_raw.trim();
+    let sentence = inputRaw.trim();
     let words = sentence.split(",").filter(w => w);
 
     const input1Result = input_1(sentence, words, err_msg);
@@ -330,14 +366,14 @@ function array() {
     sentence = input1Result.sentence;
     words = input1Result.words;
 
-    const positionResult = input_2(position_raw, words, err_msg);
+    const positionResult = input_2(positionRaw, words, err_msg);
     if (!positionResult) {
         err_msg.classList.remove("d-none");
         return;
     }
     const { position } = positionResult;
 
-    const replacement = input_3(replacement_raw, sentence, err_msg);
+    const replacement = input_3(replacementRaw, sentence, err_msg);
     if (replacement === null) {
         err_msg.classList.remove("d-none");
         return;
