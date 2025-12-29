@@ -80,52 +80,91 @@ function input_1(sentence, words, err_msg) {
             const isL = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
             const isD = (code >= 48 && code <= 57);
 
-            if (isL) { hasL = true; continue; }
-            if (isD) { hasD = true; continue; }
+            if (isL) { 
+                hasL = true; 
+                continue; 
+            }
+            if (isD) { 
+                hasD = true; 
+                continue; 
+            }
 
             if (ch === '.') {
                 dotCount++;
-                if (dotCount > 1) { err_msg.innerText = 'Special character(s) not allowed'; return false; }
+                if (dotCount > 1) { 
+                    err_msg.innerText = 'Special character(s) not allowed'; 
+                    return false; 
+                }
                 const b = i - 1, a = i + 1;
-                if (b < start || a >= n) { err_msg.innerText = 'Special character(s) not allowed'; return false; }
+                if (b < start || a >= n) { 
+                    err_msg.innerText = 'Special character(s) not allowed'; 
+                    return false; 
+                }
                 const bc = part[b].charCodeAt(0), ac = part[a].charCodeAt(0);
-                if (!(bc >= 48 && bc <= 57) || !(ac >= 48 && ac <= 57)) { err_msg.innerText = 'Special character(s) not allowed'; return false; }
+                if (!(bc >= 48 && bc <= 57) || !(ac >= 48 && ac <= 57)) { 
+                    err_msg.innerText = 'Special character(s) not allowed'; 
+                    return false; 
+                }
                 hasD = true; continue;
             }
 
             err_msg.innerText = 'Special character(s) not allowed'; return false;
         }
 
-        if (hasL && hasD) { err_msg.innerText = 'Invalid input type'; return false; }
-        if (hasL && (start === 1 || dotCount > 0)) { err_msg.innerText = 'Special character(s) not allowed'; return false; }
+        if (hasL && hasD) { 
+            err_msg.innerText = 'Invalid input type'; 
+            return false; 
+        }
+        if (hasL && (start === 1 || dotCount > 0)) { 
+            err_msg.innerText = 'Special character(s) not allowed'; 
+            return false; 
+        }
 
         if (hasL && !hasD) has_alpha = true;
         if (!hasL && hasD) has_numeric = true;
     }
 
-    if (has_alpha && has_numeric) { err_msg.innerText = 'Invalid input type'; return false; }
+    if (has_alpha && has_numeric) { 
+        err_msg.innerText = 'Invalid input type'; 
+        return false; 
+    }
     return { sentence, words };
 }
 
 function input_2(positionRaw, words, err_msg) {
-    if (positionRaw == null) { err_msg.innerText = "Please enter a position"; return null; }
+    if (positionRaw == null) { 
+        err_msg.innerText = "Please enter a position"; 
+        return null; 
+    }
     let posTrim = positionRaw.toString().trim();
-    if (posTrim.length === 0) { err_msg.innerText = "Please enter a position"; return null; }
+    if (posTrim.length === 0) { 
+        err_msg.innerText = "Please enter a position"; 
+        return null; 
+    }
 
     let startIndex = 0; const first = posTrim[0];
 
     if (first === '+') {
         startIndex = 1;
-        if (posTrim.length === 1) { err_msg.innerText = "Please enter a valid position"; return null; }
+        if (posTrim.length === 1) { 
+            err_msg.innerText = "Please enter a valid position"; 
+            return null; 
+        }
         if (posTrim.length > 1 && (posTrim[1] === '+' || posTrim[1] === '-' || posTrim[1] === '.')) {
             err_msg.innerText = "Special character(s) not allowed"; return null;
         }
     } else if (first === '-') {
-        if (posTrim.length === 1) { err_msg.innerText = "Negative numbers not allowed"; return null; }
+        if (posTrim.length === 1) { 
+            err_msg.innerText = "Negative numbers not allowed"; 
+            return null; 
+        }
         let restAllDigits = true;
         for (let i = 1, n = posTrim.length; i < n; i++) {
             const code = posTrim[i].charCodeAt(0);
-            if (!(code >= 48 && code <= 57)) { restAllDigits = false; break; }
+            if (!(code >= 48 && code <= 57)) { 
+                restAllDigits = false; 
+                break; 
+            }
         }
         err_msg.innerText = restAllDigits ? "Negative numbers not allowed" : "Special character(s) not allowed";
         return null;
@@ -133,8 +172,14 @@ function input_2(positionRaw, words, err_msg) {
         const code = first.charCodeAt(0);
         const isDigit = (code >= 48 && code <= 57);
         const isLetter = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-        if (isLetter) { err_msg.innerText = "In position letter(s) not allowed"; return null; }
-        if (!isDigit) { err_msg.innerText = first === '.' ? "Special character(s) not allowed" : "Invalid position"; return null; }
+        if (isLetter) { 
+            err_msg.innerText = "In position letter(s) not allowed"; 
+            return null; 
+        }
+        if (!isDigit) { 
+            err_msg.innerText = first === '.' ? "Special character(s) not allowed" : "Invalid position"; 
+            return null; 
+        }
     }
 
     for (let i = startIndex, n = posTrim.length; i < n; i++) {
