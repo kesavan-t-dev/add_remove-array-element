@@ -143,7 +143,6 @@ function input_1(sentence, words, err_msg) {
     return { sentence, words };
 }
 
-
 function input_2(positionRaw, words, err_msg) {
     if (positionRaw == null) {
         err_msg.innerText = "Please enter a position";
@@ -236,10 +235,6 @@ function input_2(positionRaw, words, err_msg) {
     }
     return { position };
 }
-
-
-
-
 function input_3(replacementRaw, sentence, err_msg) {
     const replacement = replacementRaw.trim();
     if (replacement.length === 0) {
@@ -310,8 +305,6 @@ function input_3(replacementRaw, sentence, err_msg) {
 
     return replacement;
 }
-
-
 
 function array() {
     const inputRaw = document.getElementById("user_input_one").value.trim();
