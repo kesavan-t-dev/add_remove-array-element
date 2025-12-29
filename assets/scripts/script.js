@@ -273,6 +273,9 @@ function input_3(replacement_raw, sentence, err_msg) {
         } else if (!is_letter && !is_digit && ch !== '+' && ch !== '-' && ch !== '.') {
             err_msg.innerText = "Special character(s) not allowed";
             return null;
+        } else if (is_letter && ch !== '+' && ch !== '-' && ch !== '.') {
+            err_msg.innerText = "Special character(s) not allowed";
+            return null;
         }
     }
 
